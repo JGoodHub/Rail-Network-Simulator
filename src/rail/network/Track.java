@@ -24,8 +24,8 @@ public class Track {
     }
     
     public Track(String nameA, String nameB, int length, boolean useLong) {
-        setA(NetworkManager.findStationByName(nameA, useLong));
-        setB(NetworkManager.findStationByName(nameB, useLong));
+        setA(NetworkManager.findStationByName(nameA));
+        setB(NetworkManager.findStationByName(nameB));
         this.length = length;
         
         trackLine = GUIconstructor.createTrackLine(getStationA().getStationPosition(), getStationB().getStationPosition());
@@ -67,7 +67,7 @@ public class Track {
     public void addColour (Color newCol) {
         colors.add(newCol);
         colors.add(colCount++, newCol);
-        Group lineGroup = (Group) trackLine.getNode();
+        Group lineGroup = (Group) trackLine.node;
         Line line = (Line) lineGroup.getChildren().get(1);
         
         ArrayList<Stop> stopList = new ArrayList<>();
@@ -90,7 +90,7 @@ public class Track {
     public void TranslateLine (Station newEndPos) {
         if (!locked) {
             if (newEndPos == stationA) {
-                Group g = (Group) trackLine.getNode();
+                Group g = (Group) trackLine.node;
                 Line lStroke = (Line) g.getChildren().get(0);
                 lStroke.setStartX(newEndPos.getStationPosition().x);
                 lStroke.setStartY(newEndPos.getStationPosition().y);
@@ -98,7 +98,7 @@ public class Track {
                 lFill.setStartX(newEndPos.getStationPosition().x);
                 lFill.setStartY(newEndPos.getStationPosition().y);
             } else {
-                Group g = (Group) trackLine.getNode();
+                Group g = (Group) trackLine.node;
                 Line lStroke = (Line) g.getChildren().get(0);
                 lStroke.setEndX(newEndPos.getStationPosition().x);
                 lStroke.setEndY(newEndPos.getStationPosition().y);

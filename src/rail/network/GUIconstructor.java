@@ -24,7 +24,7 @@ import javafx.scene.transform.Rotate;
 
 public class GUIconstructor {
     
-    public static NodeZ createStation (String nameLong, String nameShort, Vector2 position, double angle) {
+    public static NodeZ createStation (String nameLong, Vector2 position, double angle) {
         Group stationGroup = new Group();
         
         Circle stationIcon = new Circle(position.x, position.y, 8, Color.WHITE);  
@@ -35,15 +35,8 @@ public class GUIconstructor {
         stationNameLong.setLayoutX(position.x + 11);        
         stationNameLong.setLayoutY(position.y -7.5);       
         stationNameLong.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        stationNameLong.setVisible(NetworkManager.useLong);
         
-        Label stationNameShort = new Label(nameShort);
-        stationNameShort.setLayoutX(position.x + 11);        
-        stationNameShort.setLayoutY(position.y -7.5);       
-        stationNameShort.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        stationNameShort.setVisible(!NetworkManager.useLong);
-        
-        stationGroup.getChildren().addAll(stationIcon, stationNameLong, stationNameShort);        
+        stationGroup.getChildren().addAll(stationIcon, stationNameLong);        
         stationGroup.getTransforms().add(new Rotate(angle, position.x, position.y));  
         return new NodeZ(stationGroup, 1);
     }
@@ -79,7 +72,6 @@ public class GUIconstructor {
         VBox addStationMenu = new VBox(3);
         Label addStationLabel = new Label("Add New Station");
         TextField nameInputL = new TextField("Name Long");
-        TextField nameInputS = new TextField("Name Short");
         TextField xPosInput = new TextField("300");
         TextField yPosInput = new TextField("300");
         
@@ -95,14 +87,14 @@ public class GUIconstructor {
         Button addStationButton = new Button("Add");
         addStationButton.setOnAction(e -> {
             NetworkManager.addNewStation(
-                    nameInputL.getText(), nameInputS.getText(),
+                    nameInputL.getText(), 
                     xPosInput.getText(), yPosInput.getText(),
                     angleInput.getValue());            
         });    
         
         addStationMenu.getChildren().addAll(
                 addStationLabel,
-                nameInputL, nameInputS,
+                nameInputL, 
                 xPosInput, yPosInput,
                 angleInput,
                 addStationButton
@@ -133,21 +125,16 @@ public class GUIconstructor {
         HBox enterStation = new HBox();        
         TextField stationInput = new TextField("Station");
         
-        CheckBox stopAtStation = new CheckBox();
-        HBox stopWrapper = new HBox(stopAtStation);
-        stopWrapper.setPadding(new Insets(3, 0, 0, 4));
-        
         Button addRouteButton = new Button("Add");
         addRouteButton.setMinWidth(40);
         addRouteButton.setOnAction(e -> {
             NetworkManager.addNewRoute(stationInput.getText(), colorPicker.getValue());
         }); 
         
-        enterStation.getChildren().addAll(stationInput, stopWrapper, addRouteButton);
+        enterStation.getChildren().addAll(stationInput, addRouteButton);
                 
         addRouteMenu.getChildren().addAll(addRouteLabel, colorPicker, enterStation);
-                
-        
+         
         return addRouteMenu;
     }
     
@@ -159,8 +146,7 @@ public class GUIconstructor {
         GridPane dPad = new GridPane();
         Button up = new Button("↑");
         up.setOnAction(e -> NetworkManager.findStationByName(
-                nameInput.getText(), 
-                NetworkManager.useLong).Translate(new Vector2(0, -37.5d))
+                nameInput.getText()).Translate(new Vector2(0, -37.5d))
         );
         up.setPrefWidth(30);
         up.setPrefHeight(30);
@@ -168,8 +154,7 @@ public class GUIconstructor {
         
         Button down = new Button("↓");
         down.setOnAction(e -> NetworkManager.findStationByName(
-                nameInput.getText(), 
-                NetworkManager.useLong).Translate(new Vector2(0, 37.5d))
+                nameInput.getText()).Translate(new Vector2(0, 37.5d))
         );
         down.setPrefWidth(30);
         down.setPrefHeight(30);
@@ -177,8 +162,7 @@ public class GUIconstructor {
         
         Button left = new Button("←");
         left.setOnAction(e -> NetworkManager.findStationByName(
-                nameInput.getText(), 
-                NetworkManager.useLong).Translate(new Vector2(-37.5d, 0))
+                nameInput.getText()).Translate(new Vector2(-37.5d, 0))
         );
         left.setPrefWidth(30);
         left.setPrefHeight(30);
@@ -186,8 +170,7 @@ public class GUIconstructor {
         
         Button right = new Button("→");
         right.setOnAction(e -> NetworkManager.findStationByName(
-                nameInput.getText(), 
-                NetworkManager.useLong).Translate(new Vector2(37.5d, 0))
+                nameInput.getText()).Translate(new Vector2(37.5d, 0))
         );
         right.setPrefWidth(30);
         right.setPrefHeight(30);
@@ -207,7 +190,7 @@ public class GUIconstructor {
         angleInput.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
-                Station currStat = NetworkManager.findStationByName(nameInput.getText(), NetworkManager.useLong);
+                Station currStat = NetworkManager.findStationByName(nameInput.getText());
                 if (currStat != null) {
                     currStat.Rotate((double) new_val);
                 }

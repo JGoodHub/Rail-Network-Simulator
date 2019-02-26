@@ -5,12 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import javafx.application.Application;
 import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Tab;
@@ -23,18 +20,29 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 public class NetworkManager extends Application {
+    
+    //-----VARIABLES-----
 
     private static ArrayList<Station> stations = new ArrayList<Station>();
     public static ArrayList<Track> tracks = new ArrayList<Track>();
     public static ArrayList<Route> routes = new ArrayList<Route>();    
        
+    private boolean running = false;
+    
+    private static Circle brCornerPin = new Circle(590, 590, 0.01d);
+
+    public static Pane railMap = new Pane();    
+    private static ArrayList<NodeZ> layoutNodes = new ArrayList<>();
+    
+    //-----METHODS-----
+    
     public static ArrayList<Station> getAllStations () {
         return stations;
-    }
+    }    
     
-    public static Station findStationByName (String name, boolean useLong) {
+    public static Station findStationByName (String name) {
         for (Station station : stations) {
-            if (station.getName(useLong).equals(name)) {
+            if (station.nameLong.equals(name)) {
                 return station;
             }        
         }        
@@ -57,14 +65,13 @@ public class NetworkManager extends Application {
         scrollableMap.setHbarPolicy(ScrollBarPolicy.NEVER);
         scrollableMap.setVbarPolicy(ScrollBarPolicy.NEVER);           
         borderLayout.setLeft(scrollableMap);        
-        addNodeToMap(new NodeZ(corner, 0));
+        addNodeToMap(new NodeZ(brCornerPin, 0));
         
         TabPane menu = new TabPane(
                 new Tab("Run", createRunTab()),
                 new Tab("Add", createAddTab()),
                 new Tab("Mod", createModTab()),
-                new Tab("Del"),
-                new Tab("Misc", createMiscTab()));        
+                new Tab("Del"));        
         for (Tab tab : menu.getTabs()) {
             tab.setClosable(false);
         }
@@ -76,22 +83,19 @@ public class NetworkManager extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
         reOrderNodes();
-    }
+    }    
     
-    private boolean running = false;
     private Node createRunTab () {
         VBox wrapper = new VBox(15);
         wrapper.setPadding(new Insets(8, 8, 8, 8));
         Button startBut = new Button("Start Simulation");
         startBut.setOnAction(e -> {
             if (running) {
-                if (running) {
-                    startBut.setText("Start Simulation");
-                    running = false;
-                    for (Route route : routes) {
-                        route.StopTrain();
-                    }
-                }                
+                startBut.setText("Start Simulation");
+                running = false;
+                for (Route route : routes) {
+                    route.StopTrain();
+                }
             } else {
                 if (routes.size() > 0) {
                     startBut.setText("Stop Simulation");
@@ -127,36 +131,22 @@ public class NetworkManager extends Application {
         );        
         return wrapper; 
     }
-    
-    public static boolean useLong = true;
-    private Node createMiscTab () {
-        VBox wrapper = new VBox(15);
-        wrapper.setPadding(new Insets(8, 8, 8, 8));
         
-        CheckBox nameTypeToggle = new CheckBox("Use Long Name");
-        nameTypeToggle.setOnAction(e -> toggleNameLength());
-        nameTypeToggle.setSelected(true);
-        
-        wrapper.getChildren().add(nameTypeToggle);
-        return wrapper;        
-    }
-    
-    private static Circle corner = new Circle(590, 590, 0.01d);
-    public static void addNewStation (String nL, String nS, String x, String y, double angle) {
+    public static void addNewStation (String nL, String x, String y, double angle) {
         try {
             int xPos = Integer.parseInt(x);
             int yPos = Integer.parseInt(y);            
                 for (Station station : getAllStations()) {
-                    if (nL.equals(station.getName(true)) || nS.equals(station.getName(false)) || station.getStationPosition().equals(new Vector2(xPos, yPos))) {
+                    if (nL.equals(station.nameLong) || station.getStationPosition().equals(new Vector2(xPos, yPos))) {
                         System.out.println("ERROR: Duplicate Station");
                         return;
                     }
                 }
                 
-                if (xPos > corner.getCenterX() - 200) {corner.setCenterX(xPos + 200);}                
-                if (yPos > corner.getCenterY() - 200) {corner.setCenterY(yPos + 200);}
+                if (xPos > brCornerPin.getCenterX() - 200) {brCornerPin.setCenterX(xPos + 200);}                
+                if (yPos > brCornerPin.getCenterY() - 200) {brCornerPin.setCenterY(yPos + 200);}
                 
-                Station newStat = new Station(nL, nS, new Vector2(xPos, yPos), angle);
+                Station newStat = new Station(nL, new Vector2(xPos, yPos), angle);
                 stations.add(newStat);
                 reOrderNodes();
         } catch (NumberFormatException e) {
@@ -167,8 +157,8 @@ public class NetworkManager extends Application {
     public static void addNewTrack (String statA, String statB, String length) {
         try {
             int len = Integer.parseInt(length);
-            Station a = findStationByName(statA, useLong);
-            Station b = findStationByName(statB, useLong);
+            Station a = findStationByName(statA);
+            Station b = findStationByName(statB);
             if (a != null && b != null && a.isConnectedTo(b) == null) {                
                 tracks.add(new Track(a, b, len));
                 reOrderNodes();
@@ -182,7 +172,7 @@ public class NetworkManager extends Application {
     
     public static void addNewRoute (String statStrings, Color col) {
         String[] statStringArray = statStrings.split(", ");   
-        Route newRoute = new Route(statStringArray, useLong);
+        Route newRoute = new Route(statStringArray);
         for (Route route : routes) {
             if (route.equalsStations(newRoute)) {
                 System.out.println("ERROR: Route Duplicate");
@@ -195,46 +185,35 @@ public class NetworkManager extends Application {
         } else {
             System.out.println("ERROR: Route Not Valid");
         }
-    }
-        
-    public static Pane railMap = new Pane();    
-    private static ArrayList<NodeZ> layoutNodes = new ArrayList<>();
-    
+    }        
+  
     public static void addNodeToMap (NodeZ node) {
         layoutNodes.add(node);
-        railMap.getChildren().add(node.getNode());
+        railMap.getChildren().add(node.node);
     }
     
     public static void removeNodeToMap (NodeZ node) {
         layoutNodes.remove(node);
-        railMap.getChildren().remove(node.getNode());
+        railMap.getChildren().remove(node.node);
     }
     
     public static void reOrderNodes () {
         railMap.getChildren().clear();
         Collections.sort(layoutNodes, new Comparator<NodeZ>() {
             @Override
-            public int compare(NodeZ node1, NodeZ node2) {
-                return  node1.getZ().compareTo(node2.getZ());
+            public int compare(NodeZ nodeA, NodeZ nodeB) {
+                if (nodeA.zOrder > nodeB.zOrder)
+                    return 1;
+                 else if (nodeA.zOrder < nodeB.zOrder)
+                    return -1;
+                 else
+                    return 0;
             }
         });
         
-        for (NodeZ n : layoutNodes) {
-            railMap.getChildren().add(n.getNode());
+        for (NodeZ orderedNode : layoutNodes) {
+            railMap.getChildren().add(orderedNode.node);
         }
-    }
-    
-    private void toggleNameLength () {
-        useLong = !useLong;        
-        for (Station stat : stations) {
-            Group g = (Group) stat.getStationNode();
-            Label l = (Label) g.getChildren().get(1);
-            Label s = (Label) g.getChildren().get(2);
-            l.setVisible(useLong);
-            s.setVisible(!useLong);      
-        }
-        
-        
     }
         
 }

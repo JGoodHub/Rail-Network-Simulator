@@ -11,30 +11,16 @@ public class Station {
     
     NodeZ stationNode;
     double angle;
-    public Station (String nameLong, String nameShort, Vector2 position, double angle) {
-        setName(nameLong, nameShort);
-        truePosition = position;
-        this.angle = angle;
+    public Station (String _nameLong, Vector2 _position, double _angle) {
+        nameLong = _nameLong;
+        position = _position;
+        angle = _angle;
         
-        stationNode = GUIconstructor.createStation(nameLong, nameShort, position, angle);
+        stationNode = GUIconstructor.createStation(nameLong, position, angle);
         NetworkManager.addNodeToMap(stationNode);
     }    
     
-    private String nameLong;
-    private String nameShort;
-    
-    public void setName (String newNameLong, String newNameShort) {
-        nameLong = newNameLong;
-        nameShort = newNameShort;         
-    }    
-    
-    public String getName (boolean getLong) {
-        if (getLong) {
-            return nameLong;
-        } else {
-            return nameShort;
-        }
-    } 
+    public String nameLong;
     
     private ArrayList<Track> adjacentTracks = new ArrayList<>();
     
@@ -59,38 +45,38 @@ public class Station {
         return null;
     }
     
-    private Vector2 truePosition = new Vector2();   
+    private Vector2 position = new Vector2();   
     public Vector2 getStationPosition () {
-        return (truePosition);        
+        return (position);        
     }
     
     public Node getStationNode () {
-        return stationNode.getNode();
+        return stationNode.node;
     }
     
     public boolean locked = false;
     public void Translate (Vector2 ammount) {
         if (!locked) {
-            Group g = (Group) stationNode.getNode();
+            Group g = (Group) stationNode.node;
             Circle c = (Circle) g.getChildren().get(0);
             Label l = (Label) g.getChildren().get(1);
             Label s = (Label) g.getChildren().get(2);
 
-            g.getTransforms().add(new Rotate(-angle, truePosition.x, truePosition.y));
+            g.getTransforms().add(new Rotate(-angle, position.x, position.y));
 
-            truePosition.x += ammount.x;
-            truePosition.y += ammount.y;
+            position.x += ammount.x;
+            position.y += ammount.y;
 
-            c.setCenterX(truePosition.x);
-            c.setCenterY(truePosition.y);
+            c.setCenterX(position.x);
+            c.setCenterY(position.y);
 
-            l.setLayoutX(truePosition.x + 11);
-            l.setLayoutY(truePosition.y - 7.5);
+            l.setLayoutX(position.x + 11);
+            l.setLayoutY(position.y - 7.5);
 
-            s.setLayoutX(truePosition.x + 11);
-            s.setLayoutY(truePosition.y - 7.5);
+            s.setLayoutX(position.x + 11);
+            s.setLayoutY(position.y - 7.5);
 
-            g.getTransforms().add(new Rotate(angle, truePosition.x, truePosition.y));
+            g.getTransforms().add(new Rotate(angle, position.x, position.y));
 
             for (Track adjTrack : adjacentTracks) {
                 adjTrack.TranslateLine(this);
@@ -100,7 +86,7 @@ public class Station {
     }
     
     public void Rotate (double newAngle) {
-        Group g = (Group) stationNode.getNode();
+        Group g = (Group) stationNode.node;
 
         double yx = g.getLocalToSceneTransform().getMyx();
         double yy = g.getLocalToSceneTransform().getMyy();
@@ -108,8 +94,8 @@ public class Station {
         currAngle = Math.toDegrees(currAngle);
         currAngle = currAngle < 0 ? currAngle + 360 : currAngle;
 
-        g.getTransforms().add(new Rotate(-currAngle, truePosition.x, truePosition.y));  
-        g.getTransforms().add(new Rotate(newAngle, truePosition.x, truePosition.y));
+        g.getTransforms().add(new Rotate(-currAngle, position.x, position.y));  
+        g.getTransforms().add(new Rotate(newAngle, position.x, position.y));
         angle = newAngle;            
             
     }

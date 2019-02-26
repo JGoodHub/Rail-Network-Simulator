@@ -7,11 +7,11 @@ public class Route {
        
     private ArrayList<Station> stations = new ArrayList<>();
     
-    public Route (String[] stationNames, boolean useLong) {
+    public Route (String[] stationNames) {
         for (String name : stationNames) {
-            Station nextStat = NetworkManager.findStationByName(name, useLong);
+            Station nextStat = NetworkManager.findStationByName(name);
             if (nextStat != null) {
-                stations.add(NetworkManager.findStationByName(name, useLong)); 
+                stations.add(NetworkManager.findStationByName(name)); 
                 nextStat.locked = true;
             }
         }

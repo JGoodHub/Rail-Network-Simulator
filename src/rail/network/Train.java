@@ -44,7 +44,7 @@ public class Train {
             }
         }
         
-        PathTransition pathTrans = new PathTransition(Duration.seconds(duration), path, trainNode.getNode());
+        PathTransition pathTrans = new PathTransition(Duration.seconds(duration), path, trainNode.node);
         pathTrans.setOnFinished(e -> {
             if (nextStationPtr == stops.size() - 1) {
                 reversed = true;
