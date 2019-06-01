@@ -23,16 +23,16 @@ public class NetworkManager extends Application {
     
     //-----VARIABLES-----
 
-    private static ArrayList<Station> stations = new ArrayList<Station>();
-    public static ArrayList<Track> tracks = new ArrayList<Track>();
-    public static ArrayList<Route> routes = new ArrayList<Route>();    
+    private static final ArrayList<Station> stations = new ArrayList<>();
+    public static ArrayList<Track> tracks = new ArrayList<>();
+    public static ArrayList<Route> routes = new ArrayList<>();    
        
     private boolean running = false;
     
-    private static Circle brCornerPin = new Circle(590, 590, 0.01d);
+    private static final Circle bottomRightCornerPin = new Circle(590, 590, 1d);
 
     public static Pane railMap = new Pane();    
-    private static ArrayList<NodeZ> layoutNodes = new ArrayList<>();
+    private static final ArrayList<NodeZ> layoutNodes = new ArrayList<>();
     
     //-----METHODS-----
     
@@ -40,9 +40,9 @@ public class NetworkManager extends Application {
         return stations;
     }    
     
-    public static Station findStationByName (String name) {
+    public static Station findStationByName (String searchName) {
         for (Station station : stations) {
-            if (station.nameLong.equals(name)) {
+            if (station.name.equals(searchName)) {
                 return station;
             }        
         }        
@@ -64,8 +64,9 @@ public class NetworkManager extends Application {
         scrollableMap.setPannable(true);
         scrollableMap.setHbarPolicy(ScrollBarPolicy.NEVER);
         scrollableMap.setVbarPolicy(ScrollBarPolicy.NEVER);           
-        borderLayout.setLeft(scrollableMap);        
-        addNodeToMap(new NodeZ(brCornerPin, 0));
+        borderLayout.setLeft(scrollableMap);
+        
+        addNodeToMap(new NodeZ(bottomRightCornerPin, 0));
         
         TabPane menu = new TabPane(
                 new Tab("Run", createRunTab()),
@@ -132,21 +133,26 @@ public class NetworkManager extends Application {
         return wrapper; 
     }
         
-    public static void addNewStation (String nL, String x, String y, double angle) {
+    public static void addNewStation (String name, String _xPos, String _yPos, double angle) {
         try {
-            int xPos = Integer.parseInt(x);
-            int yPos = Integer.parseInt(y);            
+            int xPos = Integer.parseInt(_xPos);
+            int yPos = Integer.parseInt(_yPos);            
                 for (Station station : getAllStations()) {
-                    if (nL.equals(station.nameLong) || station.getStationPosition().equals(new Vector2(xPos, yPos))) {
+                    if (name.equals(station.name) || station.getStationPosition().equals(new Vector2(xPos, yPos))) {
                         System.out.println("ERROR: Duplicate Station");
                         return;
                     }
                 }
                 
-                if (xPos > brCornerPin.getCenterX() - 200) {brCornerPin.setCenterX(xPos + 200);}                
-                if (yPos > brCornerPin.getCenterY() - 200) {brCornerPin.setCenterY(yPos + 200);}
+                if (xPos > bottomRightCornerPin.getCenterX() - 200) {
+                    bottomRightCornerPin.setCenterX(xPos + 200);
+                }   
                 
-                Station newStat = new Station(nL, new Vector2(xPos, yPos), angle);
+                if (yPos > bottomRightCornerPin.getCenterY() - 200) {
+                    bottomRightCornerPin.setCenterY(yPos + 200);
+                }
+                
+                Station newStat = new Station(name, new Vector2(xPos, yPos), angle);
                 stations.add(newStat);
                 reOrderNodes();
         } catch (NumberFormatException e) {
@@ -204,9 +210,9 @@ public class NetworkManager extends Application {
             public int compare(NodeZ nodeA, NodeZ nodeB) {
                 if (nodeA.zOrder > nodeB.zOrder)
                     return 1;
-                 else if (nodeA.zOrder < nodeB.zOrder)
+                else if (nodeA.zOrder < nodeB.zOrder)
                     return -1;
-                 else
+                else
                     return 0;
             }
         });

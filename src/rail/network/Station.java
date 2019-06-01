@@ -11,16 +11,16 @@ public class Station {
     
     NodeZ stationNode;
     double angle;
-    public Station (String _nameLong, Vector2 _position, double _angle) {
-        nameLong = _nameLong;
+    public Station (String _name, Vector2 _position, double _angle) {
+        name = _name;
         position = _position;
         angle = _angle;
         
-        stationNode = GUIconstructor.createStation(nameLong, position, angle);
+        stationNode = GUIconstructor.createStation(name, position, angle);
         NetworkManager.addNodeToMap(stationNode);
     }    
     
-    public String nameLong;
+    public String name;
     
     private ArrayList<Track> adjacentTracks = new ArrayList<>();
     
